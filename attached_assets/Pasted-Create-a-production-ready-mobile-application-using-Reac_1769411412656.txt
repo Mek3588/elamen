@@ -1,0 +1,141 @@
+Create a production-ready mobile application using React Native (Expo preferred).
+
+This system includes TWO mobile apps sharing the same backend:
+
+1) Worker App (Restaurant Staff)
+2) Manager App (Admin)
+
+The Manager app acts as the ADMIN PANEL.
+
+====================
+TECH STACK
+====================
+- React Native (Expo)
+- TypeScript
+- React Navigation
+- Redux Toolkit or Context API
+- Axios
+- Node.js + Express
+- MongoDB + Mongoose
+- JWT Authentication
+- Role-based access control
+- Socket.IO for real-time updates
+- Expo Push Notifications
+- Image upload support (Cloudinary or local storage)
+
+====================
+AUTHENTICATION
+====================
+- Login with JWT
+- Roles: worker, manager
+- Protected routes
+- Role-based access
+
+====================
+REAL-TIME & NOTIFICATIONS
+====================
+When a worker:
+- Accepts an order
+- Starts preparing food
+- Marks food as ready
+
+→ Notify managers via:
+- Socket.IO (real-time)
+- Push notifications
+
+Managers can tap notifications to open order details.
+
+====================
+WORKER APP FEATURES
+====================
+Workers can:
+
+- Login
+- View available menu products (from admin)
+- See product:
+  - Image
+  - Name
+  - Price
+  - Availability
+- Create orders using available products
+- Accept incoming orders
+- Update order status:
+  - Accepted
+  - Preparing (SEND NOTIFICATION)
+  - Ready
+  - Served
+- Add notes to orders
+- View assigned orders
+- Simple and fast kitchen-friendly UI
+
+====================
+MANAGER (ADMIN) APP FEATURES
+====================
+Managers can:
+
+### 🔹 Order & Kitchen Management
+- View all orders in real time
+- Track order status and assigned worker
+- Live kitchen dashboard
+- Receive notifications when cooking starts
+- Add notes or instructions to orders
+- Prioritize, pause, or reassign orders
+
+### 🔹 Product / Menu Management (ADMIN)
+- Add new products (food items)
+- Upload product image
+- Set:
+  - Product name
+  - Price
+  - Category
+  - Availability (in stock / out of stock)
+- Edit or delete products
+- Enable / disable products (workers see updates instantly)
+- Control portion amount or quantity limits
+
+### 🔹 Analytics & Control
+- View revenue dashboard:
+  - Daily / Weekly / Monthly
+- View popular products
+- View order history
+- View worker performance
+- Manage workers (view activity, assign orders)
+
+====================
+BACKEND FEATURES
+====================
+- Express REST API
+- Socket.IO server
+- MongoDB Models:
+  - User
+  - Product (menu item)
+  - Order
+  - OrderItem
+  - Notification
+- Image upload API (Cloudinary or Multer)
+- Secure role-based middleware
+- Emit real-time events on:
+  - Order creation
+  - Status changes
+  - Product updates
+
+====================
+UI / UX
+====================
+- Clean modern mobile UI
+- Separate navigation flows
+- Admin dashboards
+- Image previews
+- Notification badges
+- Loading & error handling
+
+====================
+DELIVERABLES
+====================
+- React Native frontend (Worker + Manager flows)
+- Backend API with image upload
+- Real-time notifications
+- Sample data
+- Clear setup instructions
+
+Build this as a real-world restaurant management system focused on performance, clarity, and scalability.
