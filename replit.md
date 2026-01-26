@@ -7,16 +7,19 @@ EL/Amen is a mobile restaurant management system built with React Native (Expo) 
 2. **Manager App** - For administrators to manage products, workers, view analytics, and download reports
 
 ## Current State
-- **Version**: 1.0.0 (MVP)
-- **Status**: Functional MVP with local data persistence
+- **Version**: 1.1.0 (Online MVP)
+- **Status**: Fully online app with PostgreSQL database and REST API
 - **Authentication**: Role-based (worker/manager) with AsyncStorage
 - **Currency**: Ethiopian Birr (Br)
+- **Theme**: Dark/Light mode with toggle and persistence
 
 ## Tech Stack
 - **Frontend**: React Native with Expo, TypeScript
-- **Backend**: Express.js (for future API expansion)
+- **Backend**: Express.js with REST API
+- **Database**: PostgreSQL with Drizzle ORM
 - **State Management**: React Context API
-- **Data Persistence**: AsyncStorage (local)
+- **Data Persistence**: PostgreSQL (online), AsyncStorage (auth/theme preferences)
+- **Real-time Sync**: 5-second polling interval
 - **UI**: Custom components with red (#D4241B) and yellow (#F5C518) color scheme
 
 ## Project Architecture
@@ -104,6 +107,10 @@ client/
 - Added Manager Profile tab with logout
 - Added Worker Management screen for managers
 - Added Reports screen with CSV download (daily/monthly)
+- Integrated PostgreSQL database with Drizzle ORM for products, orders, and workers
+- Created comprehensive REST API with endpoints for all CRUD operations and authentication
+- Updated DataContext to fetch from API with real-time polling (5-second intervals)
+- Implemented dark/light mode theme toggle with AsyncStorage persistence
 
 ## User Preferences
 - Currency: Ethiopian Birr (Br)
@@ -111,8 +118,6 @@ client/
 - Red and yellow color scheme matching EL/Amen branding
 
 ## Future Enhancements
-- Backend API integration with database
 - Cloudinary integration for product images
 - Real-time updates with Socket.IO
 - Push notifications for order updates
-- Multi-device sync
