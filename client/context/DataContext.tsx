@@ -1,21 +1,49 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Product, Order, OrderStatus, OrderItem, Worker } from "@/types";
+import { getApiUrl } from "@/lib/query-client";
 
-const PRODUCTS_KEY = "@elamen_products";
-const ORDERS_KEY = "@elamen_orders";
-const WORKERS_KEY = "@elamen_workers";
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  available: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
-const SAMPLE_PRODUCTS: Product[] = [
-  { id: "1", name: "Tibs", price: 250, category: "Mains", available: true, description: "Sauteed beef with onions and peppers" },
-  { id: "2", name: "Doro Wat", price: 300, category: "Mains", available: true, description: "Spicy chicken stew with egg" },
-  { id: "3", name: "Kitfo", price: 280, category: "Mains", available: true, description: "Ethiopian beef tartare" },
-  { id: "4", name: "Shiro", price: 120, category: "Vegetarian", available: true, description: "Chickpea stew" },
-  { id: "5", name: "Beyaynet", price: 150, category: "Vegetarian", available: true, description: "Fasting platter" },
-  { id: "6", name: "Burger", price: 180, category: "Fast Food", available: true, description: "Classic beef burger" },
-  { id: "7", name: "Pizza", price: 220, category: "Fast Food", available: true, description: "Mixed pizza" },
-  { id: "8", name: "Juice", price: 50, category: "Drinks", available: true, description: "Fresh fruit juice" },
-];
+interface OrderItem {
+  id: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  price: number;
+}
+
+type OrderStatus = "pending" | "preparing" | "ready" | "completed" | "cancelled";
+
+interface Order {
+  id: string;
+  items: OrderItem[];
+  status: OrderStatus;
+  totalAmount: number;
+  tableNumber?: number | null;
+  notes?: string | null;
+  workerId?: string | null;
+  workerName?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Worker {
+  id: string;
+  username: string;
+  password: string;
+  role: string;
+  active: boolean;
+  createdAt: string;
+}
 
 interface DataContextType {
   products: Product[];
@@ -23,7 +51,7 @@ interface DataContextType {
   workers: Worker[];
   isLoading: boolean;
   refreshData: () => Promise<void>;
-  addProduct: (product: Omit<Product, "id">) => Promise<Product>;
+  addProduct: (product: Omit<Product, "id" | "createdAt" | "updatedAt">) => Promise<Product>;
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   createOrder: (items: Omit<OrderItem, "id">[], tableNumber?: number, notes?: string) => Promise<Order>;
@@ -42,31 +70,59 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = useCallback(async () => {
+  const apiUrl = getApiUrl();
+
+  const fetchProducts = async () => {
     try {
-      const [storedProducts, storedOrders, storedWorkers] = await Promise.all([
-        AsyncStorage.getItem(PRODUCTS_KEY),
-        AsyncStorage.getItem(ORDERS_KEY),
-        AsyncStorage.getItem(WORKERS_KEY),
-      ]);
-
-      if (storedProducts) {
-        setProducts(JSON.parse(storedProducts));
-      } else {
-        setProducts(SAMPLE_PRODUCTS);
-        await AsyncStorage.setItem(PRODUCTS_KEY, JSON.stringify(SAMPLE_PRODUCTS));
-      }
-
-      if (storedOrders) {
-        setOrders(JSON.parse(storedOrders));
-      }
-
-      if (storedWorkers) {
-        setWorkers(JSON.parse(storedWorkers));
+      const response = await fetch(new URL("/api/products", apiUrl).toString());
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data);
       }
     } catch (error) {
+      console.error("Failed to fetch products:", error);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch(new URL("/api/orders", apiUrl).toString());
+      if (response.ok) {
+        const data = await response.json();
+        setOrders(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch orders:", error);
+    }
+  };
+
+  const fetchWorkers = async () => {
+    try {
+      const response = await fetch(new URL("/api/workers", apiUrl).toString());
+      if (response.ok) {
+        const data = await response.json();
+        setWorkers(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch workers:", error);
+    }
+  };
+
+  const seedDatabase = async () => {
+    try {
+      await fetch(new URL("/api/seed", apiUrl).toString(), { method: "POST" });
+    } catch (error) {
+      console.error("Failed to seed database:", error);
+    }
+  };
+
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await seedDatabase();
+      await Promise.all([fetchProducts(), fetchOrders(), fetchWorkers()]);
+    } catch (error) {
       console.error("Failed to load data:", error);
-      setProducts(SAMPLE_PRODUCTS);
     } finally {
       setIsLoading(false);
     }
@@ -76,34 +132,59 @@ export function DataProvider({ children }: { children: ReactNode }) {
     loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchOrders();
+      fetchProducts();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const refreshData = async () => {
-    setIsLoading(true);
-    await loadData();
+    await Promise.all([fetchProducts(), fetchOrders(), fetchWorkers()]);
   };
 
-  const addProduct = async (productData: Omit<Product, "id">): Promise<Product> => {
-    const newProduct: Product = {
-      ...productData,
-      id: Date.now().toString(),
-    };
-    const updatedProducts = [...products, newProduct];
-    setProducts(updatedProducts);
-    await AsyncStorage.setItem(PRODUCTS_KEY, JSON.stringify(updatedProducts));
+  const addProduct = async (productData: Omit<Product, "id" | "createdAt" | "updatedAt">): Promise<Product> => {
+    const response = await fetch(new URL("/api/products", apiUrl).toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(productData),
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to create product");
+    }
+    
+    const newProduct = await response.json();
+    setProducts((prev) => [newProduct, ...prev]);
     return newProduct;
   };
 
   const updateProduct = async (id: string, updates: Partial<Product>) => {
-    const updatedProducts = products.map((p) =>
-      p.id === id ? { ...p, ...updates } : p
-    );
-    setProducts(updatedProducts);
-    await AsyncStorage.setItem(PRODUCTS_KEY, JSON.stringify(updatedProducts));
+    const response = await fetch(new URL(`/api/products/${id}`, apiUrl).toString(), {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to update product");
+    }
+    
+    const updatedProduct = await response.json();
+    setProducts((prev) => prev.map((p) => (p.id === id ? updatedProduct : p)));
   };
 
   const deleteProduct = async (id: string) => {
-    const updatedProducts = products.filter((p) => p.id !== id);
-    setProducts(updatedProducts);
-    await AsyncStorage.setItem(PRODUCTS_KEY, JSON.stringify(updatedProducts));
+    const response = await fetch(new URL(`/api/products/${id}`, apiUrl).toString(), {
+      method: "DELETE",
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to delete product");
+    }
+    
+    setProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
   const createOrder = async (
@@ -121,20 +202,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
       0
     );
 
-    const newOrder: Order = {
-      id: Date.now().toString(),
+    const orderData = {
       items: orderItems,
       status: "pending",
       totalAmount,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
       tableNumber,
       notes,
     };
 
-    const updatedOrders = [newOrder, ...orders];
-    setOrders(updatedOrders);
-    await AsyncStorage.setItem(ORDERS_KEY, JSON.stringify(updatedOrders));
+    const response = await fetch(new URL("/api/orders", apiUrl).toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderData),
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to create order");
+    }
+    
+    const newOrder = await response.json();
+    setOrders((prev) => [newOrder, ...prev]);
     return newOrder;
   };
 
@@ -144,49 +231,62 @@ export function DataProvider({ children }: { children: ReactNode }) {
     workerId?: string,
     workerName?: string
   ) => {
-    const updatedOrders = orders.map((o) =>
-      o.id === orderId
-        ? {
-            ...o,
-            status,
-            workerId: workerId || o.workerId,
-            workerName: workerName || o.workerName,
-            updatedAt: new Date().toISOString(),
-          }
-        : o
-    );
-    setOrders(updatedOrders);
-    await AsyncStorage.setItem(ORDERS_KEY, JSON.stringify(updatedOrders));
+    const response = await fetch(new URL(`/api/orders/${orderId}/status`, apiUrl).toString(), {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status, workerId, workerName }),
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to update order status");
+    }
+    
+    const updatedOrder = await response.json();
+    setOrders((prev) => prev.map((o) => (o.id === orderId ? updatedOrder : o)));
   };
 
   const addOrderNotes = async (orderId: string, notes: string) => {
-    const updatedOrders = orders.map((o) =>
-      o.id === orderId
-        ? { ...o, notes, updatedAt: new Date().toISOString() }
-        : o
-    );
-    setOrders(updatedOrders);
-    await AsyncStorage.setItem(ORDERS_KEY, JSON.stringify(updatedOrders));
+    const response = await fetch(new URL(`/api/orders/${orderId}`, apiUrl).toString(), {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes }),
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to add order notes");
+    }
+    
+    const updatedOrder = await response.json();
+    setOrders((prev) => prev.map((o) => (o.id === orderId ? updatedOrder : o)));
   };
 
   const addWorker = async (username: string, password: string): Promise<Worker> => {
-    const newWorker: Worker = {
-      id: Date.now().toString(),
-      username,
-      password,
-      createdAt: new Date().toISOString(),
-      active: true,
-    };
-    const updatedWorkers = [...workers, newWorker];
-    setWorkers(updatedWorkers);
-    await AsyncStorage.setItem(WORKERS_KEY, JSON.stringify(updatedWorkers));
+    const response = await fetch(new URL("/api/workers", apiUrl).toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password, role: "worker" }),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to create worker");
+    }
+    
+    const newWorker = await response.json();
+    setWorkers((prev) => [newWorker, ...prev]);
     return newWorker;
   };
 
   const deleteWorker = async (id: string) => {
-    const updatedWorkers = workers.filter((w) => w.id !== id);
-    setWorkers(updatedWorkers);
-    await AsyncStorage.setItem(WORKERS_KEY, JSON.stringify(updatedWorkers));
+    const response = await fetch(new URL(`/api/workers/${id}`, apiUrl).toString(), {
+      method: "DELETE",
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to delete worker");
+    }
+    
+    setWorkers((prev) => prev.filter((w) => w.id !== id));
   };
 
   const getOrdersByDate = (startDate: Date, endDate: Date): Order[] => {
