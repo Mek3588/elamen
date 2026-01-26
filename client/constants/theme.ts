@@ -1,18 +1,15 @@
 import { Platform } from "react-native";
 
 export const RestaurantColors = {
-  primary: "#E85D04",
-  secondary: "#0A9396",
+  primary: "#D4241B",
+  secondary: "#F5C518",
   background: "#FAFAFA",
   surface: "#FFFFFF",
   textPrimary: "#1A1A1A",
   textSecondary: "#6B6B6B",
   status: {
-    pending: "#F4A261",
-    accepted: "#2A9D8F",
-    preparing: "#E76F51",
-    ready: "#06D6A0",
-    served: "#B8B8B8",
+    pending: "#F5C518",
+    completed: "#06D6A0",
   },
   semantic: {
     error: "#D62828",
@@ -22,7 +19,7 @@ export const RestaurantColors = {
 };
 
 const tintColorLight = RestaurantColors.primary;
-const tintColorDark = "#FF7A33";
+const tintColorDark = "#FF4A42";
 
 export const Colors = {
   light: {
@@ -38,7 +35,8 @@ export const Colors = {
     backgroundTertiary: "#D9D9D9",
     surface: RestaurantColors.surface,
     border: "#E0E0E0",
-    ...RestaurantColors.status,
+    pending: RestaurantColors.status.pending,
+    completed: RestaurantColors.status.completed,
     ...RestaurantColors.semantic,
   },
   dark: {
@@ -54,16 +52,15 @@ export const Colors = {
     backgroundTertiary: "#404040",
     surface: "#242424",
     border: "#3A3A3A",
-    pending: "#F4A261",
-    accepted: "#2A9D8F",
-    preparing: "#E76F51",
-    ready: "#06D6A0",
-    served: "#6B6B6B",
+    pending: "#F5C518",
+    completed: "#06D6A0",
     error: "#FF6B6B",
     warning: "#FFB347",
     success: "#06D6A0",
   },
 };
+
+export const CURRENCY = "Br";
 
 export const Spacing = {
   xs: 4,

@@ -9,7 +9,7 @@ import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useTheme } from "@/hooks/useTheme";
-import { BorderRadius, Spacing, Shadows } from "@/constants/theme";
+import { BorderRadius, Spacing, Shadows, CURRENCY } from "@/constants/theme";
 import { Order } from "@/types";
 
 interface OrderCardProps {
@@ -57,14 +57,8 @@ export function OrderCard({ order, onPress, showWorker = false }: OrderCardProps
     switch (order.status) {
       case "pending":
         return theme.pending;
-      case "accepted":
-        return theme.accepted;
-      case "preparing":
-        return theme.preparing;
-      case "ready":
-        return theme.ready;
-      case "served":
-        return theme.served;
+      case "completed":
+        return theme.completed;
       default:
         return theme.pending;
     }
@@ -135,7 +129,7 @@ export function OrderCard({ order, onPress, showWorker = false }: OrderCardProps
             ) : null}
           </View>
           <ThemedText style={[styles.total, { color: theme.link }]}>
-            ${order.totalAmount.toFixed(2)}
+            {CURRENCY} {order.totalAmount.toFixed(2)}
           </ThemedText>
         </View>
       </View>

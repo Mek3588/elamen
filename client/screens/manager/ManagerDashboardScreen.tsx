@@ -10,7 +10,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useTheme } from "@/hooks/useTheme";
 import { useData } from "@/context/DataContext";
-import { BorderRadius, Spacing, Shadows, RestaurantColors } from "@/constants/theme";
+import { BorderRadius, Spacing, Shadows, RestaurantColors, CURRENCY } from "@/constants/theme";
 import { Order } from "@/types";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -51,22 +51,20 @@ export default function ManagerDashboardScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
   const stats = useMemo(() => {
-    const activeOrders = orders.filter((o) =>
-      ["pending", "accepted", "preparing", "ready"].includes(o.status)
-    ).length;
+    const pendingOrders = orders.filter((o) => o.status === "pending").length;
     
     const todayRevenue = orders
       .filter((o) => {
         const orderDate = new Date(o.createdAt).toDateString();
         const today = new Date().toDateString();
-        return orderDate === today && o.status === "served";
+        return orderDate === today && o.status === "completed";
       })
       .reduce((sum, o) => sum + o.totalAmount, 0);
 
     const availableProducts = products.filter((p) => p.available).length;
 
     return {
-      activeOrders,
+      pendingOrders,
       todayRevenue,
       availableProducts,
       totalOrders: orders.length,
@@ -75,7 +73,7 @@ export default function ManagerDashboardScreen() {
 
   const recentOrders = useMemo(() => {
     return orders
-      .filter((o) => ["pending", "accepted", "preparing", "ready"].includes(o.status))
+      .filter((o) => o.status === "pending")
       .slice(0, 5);
   }, [orders]);
 
@@ -118,16 +116,16 @@ export default function ManagerDashboardScreen() {
 
           <View style={styles.statsGrid}>
             <StatCard
-              icon="activity"
-              label="Active Orders"
-              value={stats.activeOrders}
-              color={RestaurantColors.primary}
+              icon="clock"
+              label="Pending Orders"
+              value={stats.pendingOrders}
+              color={RestaurantColors.status.pending}
               delay={100}
             />
             <StatCard
               icon="dollar-sign"
               label="Today's Revenue"
-              value={`$${stats.todayRevenue.toFixed(0)}`}
+              value={`${CURRENCY} ${stats.todayRevenue.toFixed(0)}`}
               color={RestaurantColors.secondary}
               delay={150}
             />
@@ -135,14 +133,14 @@ export default function ManagerDashboardScreen() {
               icon="package"
               label="Available Items"
               value={stats.availableProducts}
-              color={RestaurantColors.status.accepted}
+              color={RestaurantColors.status.completed}
               delay={200}
             />
             <StatCard
               icon="clipboard"
               label="Total Orders"
               value={stats.totalOrders}
-              color={RestaurantColors.status.pending}
+              color={RestaurantColors.primary}
               delay={250}
             />
           </View>
@@ -151,7 +149,7 @@ export default function ManagerDashboardScreen() {
             entering={FadeInDown.delay(300).duration(500)}
             style={styles.sectionHeader}
           >
-            <ThemedText style={styles.sectionTitle}>Active Orders</ThemedText>
+            <ThemedText style={styles.sectionTitle}>Pending Orders</ThemedText>
             <Pressable onPress={() => navigation.navigate("ManagerOrdersTab")}>
               <ThemedText style={[styles.viewAll, { color: theme.link }]}>
                 View All
@@ -168,7 +166,7 @@ export default function ManagerDashboardScreen() {
           <Feather name="check-circle" size={40} color={theme.success} />
           <ThemedText style={styles.emptyTitle}>All Caught Up!</ThemedText>
           <ThemedText style={[styles.emptyText, { color: theme.textSecondary }]}>
-            No active orders at the moment
+            No pending orders at the moment
           </ThemedText>
         </Animated.View>
       }

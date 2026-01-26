@@ -11,6 +11,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 import { BorderRadius, Spacing, Shadows, RestaurantColors } from "@/constants/theme";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 interface MenuItemProps {
   icon: keyof typeof Feather.glyphMap;
@@ -45,16 +47,25 @@ function MenuItem({ icon, label, onPress, color, showArrow = true }: MenuItemPro
   );
 }
 
-export default function WorkerProfileScreen() {
+export default function ManagerProfileScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
   const { user, logout } = useAuth();
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
   const handleLogout = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     await logout();
+  };
+
+  const handleWorkersPress = () => {
+    navigation.navigate("WorkerManagement");
+  };
+
+  const handleReportsPress = () => {
+    navigation.navigate("Reports");
   };
 
   return (
@@ -74,7 +85,7 @@ export default function WorkerProfileScreen() {
         <View
           style={[
             styles.avatarContainer,
-            { backgroundColor: RestaurantColors.primary + "20" },
+            { backgroundColor: RestaurantColors.secondary + "30" },
           ]}
         >
           <Image
@@ -87,15 +98,28 @@ export default function WorkerProfileScreen() {
         <View
           style={[
             styles.roleBadge,
-            { backgroundColor: RestaurantColors.primary },
+            { backgroundColor: RestaurantColors.secondary },
           ]}
         >
-          <ThemedText style={styles.roleText}>Kitchen Staff</ThemedText>
+          <ThemedText style={[styles.roleText, { color: "#1A1A1A" }]}>Manager</ThemedText>
         </View>
       </Animated.View>
 
       <Animated.View
         entering={FadeInDown.delay(200).duration(500)}
+        style={styles.section}
+      >
+        <ThemedText
+          style={[styles.sectionTitle, { color: theme.textSecondary }]}
+        >
+          Management
+        </ThemedText>
+        <MenuItem icon="users" label="Manage Workers" onPress={handleWorkersPress} />
+        <MenuItem icon="file-text" label="Download Reports" onPress={handleReportsPress} />
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeInDown.delay(300).duration(500)}
         style={styles.section}
       >
         <ThemedText
@@ -109,7 +133,7 @@ export default function WorkerProfileScreen() {
       </Animated.View>
 
       <Animated.View
-        entering={FadeInDown.delay(300).duration(500)}
+        entering={FadeInDown.delay(400).duration(500)}
         style={styles.section}
       >
         <ThemedText
@@ -127,7 +151,7 @@ export default function WorkerProfileScreen() {
       </Animated.View>
 
       <Animated.View
-        entering={FadeInDown.delay(400).duration(500)}
+        entering={FadeInDown.delay(500).duration(500)}
         style={styles.footer}
       >
         <ThemedText style={[styles.version, { color: theme.textSecondary }]}>
@@ -170,7 +194,6 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   roleText: {
-    color: "#FFFFFF",
     fontSize: 13,
     fontWeight: "600",
   },

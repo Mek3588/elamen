@@ -1,24 +1,26 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Product, Order, OrderStatus, OrderItem } from "@/types";
+import { Product, Order, OrderStatus, OrderItem, Worker } from "@/types";
 
-const PRODUCTS_KEY = "@restaurant_products";
-const ORDERS_KEY = "@restaurant_orders";
+const PRODUCTS_KEY = "@elamen_products";
+const ORDERS_KEY = "@elamen_orders";
+const WORKERS_KEY = "@elamen_workers";
 
 const SAMPLE_PRODUCTS: Product[] = [
-  { id: "1", name: "Margherita Pizza", price: 12.99, category: "Pizza", available: true, description: "Fresh tomatoes, mozzarella, basil" },
-  { id: "2", name: "Pepperoni Pizza", price: 14.99, category: "Pizza", available: true, description: "Classic pepperoni with cheese" },
-  { id: "3", name: "Caesar Salad", price: 8.99, category: "Salads", available: true, description: "Romaine, croutons, parmesan" },
-  { id: "4", name: "Grilled Chicken", price: 16.99, category: "Mains", available: true, description: "Herb-marinated chicken breast" },
-  { id: "5", name: "Pasta Carbonara", price: 13.99, category: "Pasta", available: true, description: "Creamy bacon pasta" },
-  { id: "6", name: "Fish & Chips", price: 15.99, category: "Mains", available: false, description: "Beer-battered cod with fries" },
-  { id: "7", name: "Tiramisu", price: 7.99, category: "Desserts", available: true, description: "Classic Italian dessert" },
-  { id: "8", name: "Lemonade", price: 3.99, category: "Drinks", available: true, description: "Fresh squeezed lemonade" },
+  { id: "1", name: "Tibs", price: 250, category: "Mains", available: true, description: "Sauteed beef with onions and peppers" },
+  { id: "2", name: "Doro Wat", price: 300, category: "Mains", available: true, description: "Spicy chicken stew with egg" },
+  { id: "3", name: "Kitfo", price: 280, category: "Mains", available: true, description: "Ethiopian beef tartare" },
+  { id: "4", name: "Shiro", price: 120, category: "Vegetarian", available: true, description: "Chickpea stew" },
+  { id: "5", name: "Beyaynet", price: 150, category: "Vegetarian", available: true, description: "Fasting platter" },
+  { id: "6", name: "Burger", price: 180, category: "Fast Food", available: true, description: "Classic beef burger" },
+  { id: "7", name: "Pizza", price: 220, category: "Fast Food", available: true, description: "Mixed pizza" },
+  { id: "8", name: "Juice", price: 50, category: "Drinks", available: true, description: "Fresh fruit juice" },
 ];
 
 interface DataContextType {
   products: Product[];
   orders: Order[];
+  workers: Worker[];
   isLoading: boolean;
   refreshData: () => Promise<void>;
   addProduct: (product: Omit<Product, "id">) => Promise<Product>;
@@ -27,6 +29,9 @@ interface DataContextType {
   createOrder: (items: Omit<OrderItem, "id">[], tableNumber?: number, notes?: string) => Promise<Order>;
   updateOrderStatus: (orderId: string, status: OrderStatus, workerId?: string, workerName?: string) => Promise<void>;
   addOrderNotes: (orderId: string, notes: string) => Promise<void>;
+  addWorker: (username: string, password: string) => Promise<Worker>;
+  deleteWorker: (id: string) => Promise<void>;
+  getOrdersByDate: (startDate: Date, endDate: Date) => Order[];
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -34,13 +39,15 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export function DataProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadData = useCallback(async () => {
     try {
-      const [storedProducts, storedOrders] = await Promise.all([
+      const [storedProducts, storedOrders, storedWorkers] = await Promise.all([
         AsyncStorage.getItem(PRODUCTS_KEY),
         AsyncStorage.getItem(ORDERS_KEY),
+        AsyncStorage.getItem(WORKERS_KEY),
       ]);
 
       if (storedProducts) {
@@ -52,6 +59,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       if (storedOrders) {
         setOrders(JSON.parse(storedOrders));
+      }
+
+      if (storedWorkers) {
+        setWorkers(JSON.parse(storedWorkers));
       }
     } catch (error) {
       console.error("Failed to load data:", error);
@@ -158,11 +169,39 @@ export function DataProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.setItem(ORDERS_KEY, JSON.stringify(updatedOrders));
   };
 
+  const addWorker = async (username: string, password: string): Promise<Worker> => {
+    const newWorker: Worker = {
+      id: Date.now().toString(),
+      username,
+      password,
+      createdAt: new Date().toISOString(),
+      active: true,
+    };
+    const updatedWorkers = [...workers, newWorker];
+    setWorkers(updatedWorkers);
+    await AsyncStorage.setItem(WORKERS_KEY, JSON.stringify(updatedWorkers));
+    return newWorker;
+  };
+
+  const deleteWorker = async (id: string) => {
+    const updatedWorkers = workers.filter((w) => w.id !== id);
+    setWorkers(updatedWorkers);
+    await AsyncStorage.setItem(WORKERS_KEY, JSON.stringify(updatedWorkers));
+  };
+
+  const getOrdersByDate = (startDate: Date, endDate: Date): Order[] => {
+    return orders.filter((order) => {
+      const orderDate = new Date(order.createdAt);
+      return orderDate >= startDate && orderDate <= endDate;
+    });
+  };
+
   return (
     <DataContext.Provider
       value={{
         products,
         orders,
+        workers,
         isLoading,
         refreshData,
         addProduct,
@@ -171,6 +210,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         createOrder,
         updateOrderStatus,
         addOrderNotes,
+        addWorker,
+        deleteWorker,
+        getOrdersByDate,
       }}
     >
       {children}

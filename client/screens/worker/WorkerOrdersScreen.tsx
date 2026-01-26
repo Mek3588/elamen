@@ -13,15 +13,14 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/DataContext";
 import { BorderRadius, Spacing, Shadows } from "@/constants/theme";
-import { Order, OrderStatus } from "@/types";
+import { Order } from "@/types";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-type FilterType = "incoming" | "active" | "completed";
+type FilterType = "orders" | "completed";
 
 const FILTERS: { key: FilterType; label: string }[] = [
-  { key: "incoming", label: "Incoming" },
-  { key: "active", label: "Active" },
+  { key: "orders", label: "Orders" },
   { key: "completed", label: "Completed" },
 ];
 
@@ -34,25 +33,23 @@ export default function WorkerOrdersScreen() {
   const { orders, isLoading, updateOrderStatus, refreshData } = useData();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   
-  const [activeFilter, setActiveFilter] = useState<FilterType>("incoming");
+  const [activeFilter, setActiveFilter] = useState<FilterType>("orders");
   const [refreshing, setRefreshing] = useState(false);
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       switch (activeFilter) {
-        case "incoming":
+        case "orders":
           return order.status === "pending";
-        case "active":
-          return ["accepted", "preparing", "ready"].includes(order.status);
         case "completed":
-          return order.status === "served";
+          return order.status === "completed";
         default:
           return true;
       }
     });
   }, [orders, activeFilter]);
 
-  const incomingCount = useMemo(() => {
+  const pendingCount = useMemo(() => {
     return orders.filter((o) => o.status === "pending").length;
   }, [orders]);
 
@@ -66,9 +63,9 @@ export default function WorkerOrdersScreen() {
     navigation.navigate("OrderDetail", { orderId: order.id });
   };
 
-  const handleAcceptOrder = async (order: Order) => {
+  const handleCompleteOrder = async (order: Order) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    await updateOrderStatus(order.id, "accepted", user?.id, user?.username);
+    await updateOrderStatus(order.id, "completed", user?.id, user?.username);
   };
 
   if (isLoading) {
@@ -124,7 +121,7 @@ export default function WorkerOrdersScreen() {
                   >
                     {filter.label}
                   </ThemedText>
-                  {filter.key === "incoming" && incomingCount > 0 ? (
+                  {filter.key === "orders" && pendingCount > 0 ? (
                     <View
                       style={[
                         styles.badge,
@@ -140,14 +137,11 @@ export default function WorkerOrdersScreen() {
                         style={[
                           styles.badgeText,
                           {
-                            color:
-                              activeFilter === filter.key
-                                ? "#FFFFFF"
-                                : "#FFFFFF",
+                            color: "#FFFFFF",
                           },
                         ]}
                       >
-                        {incomingCount}
+                        {pendingCount}
                       </ThemedText>
                     </View>
                   ) : null}
@@ -160,34 +154,30 @@ export default function WorkerOrdersScreen() {
           <EmptyState
             image={require("../../../assets/images/empty-orders.png")}
             title={
-              activeFilter === "incoming"
-                ? "No incoming orders"
-                : activeFilter === "active"
-                ? "No active orders"
+              activeFilter === "orders"
+                ? "No pending orders"
                 : "No completed orders"
             }
             description={
-              activeFilter === "incoming"
+              activeFilter === "orders"
                 ? "New orders will appear here"
-                : activeFilter === "active"
-                ? "Accept orders to see them here"
-                : "Served orders will appear here"
+                : "Completed orders will appear here"
             }
           />
         }
         renderItem={({ item, index }) => (
           <Animated.View entering={FadeInDown.delay(index * 50).duration(400)}>
             <OrderCard order={item} onPress={() => handleOrderPress(item)} />
-            {activeFilter === "incoming" && item.status === "pending" ? (
+            {activeFilter === "orders" && item.status === "pending" ? (
               <Pressable
-                onPress={() => handleAcceptOrder(item)}
+                onPress={() => handleCompleteOrder(item)}
                 style={({ pressed }) => [
-                  styles.acceptButton,
-                  { backgroundColor: theme.accepted, opacity: pressed ? 0.8 : 1 },
+                  styles.completeButton,
+                  { backgroundColor: theme.completed, opacity: pressed ? 0.8 : 1 },
                 ]}
               >
-                <ThemedText style={styles.acceptButtonText}>
-                  Accept Order
+                <ThemedText style={styles.completeButtonText}>
+                  Mark as Completed
                 </ThemedText>
               </Pressable>
             ) : null}
@@ -237,14 +227,14 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "700",
   },
-  acceptButton: {
+  completeButton: {
     marginTop: -Spacing.sm,
     marginBottom: Spacing.md,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
     alignItems: "center",
   },
-  acceptButtonText: {
+  completeButtonText: {
     color: "#FFFFFF",
     fontSize: 15,
     fontWeight: "600",

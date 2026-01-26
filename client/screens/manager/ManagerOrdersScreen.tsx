@@ -21,11 +21,8 @@ type FilterType = "all" | OrderStatus;
 
 const FILTERS: { key: FilterType; label: string }[] = [
   { key: "all", label: "All" },
-  { key: "pending", label: "Pending" },
-  { key: "accepted", label: "Accepted" },
-  { key: "preparing", label: "Preparing" },
-  { key: "ready", label: "Ready" },
-  { key: "served", label: "Served" },
+  { key: "pending", label: "Orders" },
+  { key: "completed", label: "Completed" },
 ];
 
 export default function ManagerOrdersScreen() {

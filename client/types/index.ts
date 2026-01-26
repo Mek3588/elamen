@@ -4,9 +4,18 @@ export interface User {
   id: string;
   username: string;
   role: UserRole;
+  createdAt?: string;
 }
 
-export type OrderStatus = "pending" | "accepted" | "preparing" | "ready" | "served";
+export interface Worker {
+  id: string;
+  username: string;
+  password: string;
+  createdAt: string;
+  active: boolean;
+}
+
+export type OrderStatus = "pending" | "completed";
 
 export interface Product {
   id: string;

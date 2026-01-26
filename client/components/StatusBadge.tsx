@@ -11,11 +11,8 @@ interface StatusBadgeProps {
 }
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
-  pending: "Pending",
-  accepted: "Accepted",
-  preparing: "Preparing",
-  ready: "Ready",
-  served: "Served",
+  pending: "Order",
+  completed: "Completed",
 };
 
 export function StatusBadge({ status, size = "medium" }: StatusBadgeProps) {
@@ -25,14 +22,8 @@ export function StatusBadge({ status, size = "medium" }: StatusBadgeProps) {
     switch (status) {
       case "pending":
         return theme.pending;
-      case "accepted":
-        return theme.accepted;
-      case "preparing":
-        return theme.preparing;
-      case "ready":
-        return theme.ready;
-      case "served":
-        return theme.served;
+      case "completed":
+        return theme.completed;
       default:
         return theme.pending;
     }

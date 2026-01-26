@@ -1,38 +1,38 @@
 {
   "expo": {
-    "name": "Kitchen Flow",
-    "slug": "kitchen-flow",
+    "name": "EL/Amen",
+    "slug": "el-amen",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "kitchenflow",
+    "icon": "./assets/images/logo.png",
+    "scheme": "elamen",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kitchenflow.app"
+      "bundleIdentifier": "com.elamen.foodcourt"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E85D04",
-        "foregroundImage": "./assets/images/icon.png"
+        "backgroundColor": "#D4241B",
+        "foregroundImage": "./assets/images/logo.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.kitchenflow.app"
+      "package": "com.elamen.foodcourt"
     },
     "web": {
       "output": "single",
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/logo.png"
     },
     "plugins": [
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#E85D04",
+          "backgroundColor": "#D4241B",
           "dark": {
             "backgroundColor": "#1A1A1A"
           }

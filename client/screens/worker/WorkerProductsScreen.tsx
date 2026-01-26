@@ -18,7 +18,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useData } from "@/context/DataContext";
-import { BorderRadius, Spacing, Shadows } from "@/constants/theme";
+import { BorderRadius, Spacing, Shadows, CURRENCY, RestaurantColors } from "@/constants/theme";
 import { Product } from "@/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
@@ -207,7 +207,7 @@ export default function WorkerProductsScreen() {
           entering={FadeInDown.duration(300)}
           style={[
             styles.cartBar,
-            { backgroundColor: theme.link, bottom: tabBarHeight + Spacing.lg },
+            { backgroundColor: RestaurantColors.primary, bottom: tabBarHeight + Spacing.lg },
             Shadows.large,
           ]}
         >
@@ -224,7 +224,7 @@ export default function WorkerProductsScreen() {
               <ThemedText style={styles.cartLabel}>Create Order</ThemedText>
             </View>
             <ThemedText style={styles.cartTotal}>
-              ${cartTotal.toFixed(2)}
+              {CURRENCY} {cartTotal.toFixed(2)}
             </ThemedText>
           </Pressable>
         </Animated.View>

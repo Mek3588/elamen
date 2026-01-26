@@ -9,13 +9,13 @@ import { RestaurantColors } from "@/constants/theme";
 import ManagerDashboardScreen from "@/screens/manager/ManagerDashboardScreen";
 import ManagerOrdersScreen from "@/screens/manager/ManagerOrdersScreen";
 import ManagerProductsScreen from "@/screens/manager/ManagerProductsScreen";
-import ManagerAnalyticsScreen from "@/screens/manager/ManagerAnalyticsScreen";
+import ManagerProfileScreen from "@/screens/manager/ManagerProfileScreen";
 
 export type ManagerTabParamList = {
   ManagerDashboardTab: undefined;
   ManagerOrdersTab: undefined;
   ManagerProductsTab: undefined;
-  ManagerAnalyticsTab: undefined;
+  ManagerProfileTab: undefined;
 };
 
 const Tab = createBottomTabNavigator<ManagerTabParamList>();
@@ -27,7 +27,7 @@ export default function ManagerTabNavigator() {
     <Tab.Navigator
       initialRouteName="ManagerDashboardTab"
       screenOptions={{
-        tabBarActiveTintColor: RestaurantColors.secondary,
+        tabBarActiveTintColor: RestaurantColors.primary,
         tabBarInactiveTintColor: theme.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
@@ -80,12 +80,12 @@ export default function ManagerTabNavigator() {
         }}
       />
       <Tab.Screen
-        name="ManagerAnalyticsTab"
-        component={ManagerAnalyticsScreen}
+        name="ManagerProfileTab"
+        component={ManagerProfileScreen}
         options={{
-          title: "Analytics",
+          title: "Profile",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="bar-chart-2" size={size} color={color} />
+            <Feather name="user" size={size} color={color} />
           ),
         }}
       />

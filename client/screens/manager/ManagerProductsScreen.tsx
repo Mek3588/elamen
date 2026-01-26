@@ -18,7 +18,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useData } from "@/context/DataContext";
-import { BorderRadius, Spacing, Shadows, RestaurantColors } from "@/constants/theme";
+import { BorderRadius, Spacing, Shadows, RestaurantColors, CURRENCY } from "@/constants/theme";
 import { Product } from "@/types";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -58,7 +58,7 @@ function ProductRow({ product, onPress, onToggleAvailability }: ProductRowProps)
           {product.category}
         </ThemedText>
         <ThemedText style={[styles.productPrice, { color: theme.link }]}>
-          ${product.price.toFixed(2)}
+          {CURRENCY} {product.price.toFixed(2)}
         </ThemedText>
       </View>
 
@@ -71,9 +71,9 @@ function ProductRow({ product, onPress, onToggleAvailability }: ProductRowProps)
           }}
           trackColor={{
             false: theme.backgroundDefault,
-            true: RestaurantColors.status.accepted + "80",
+            true: RestaurantColors.status.completed + "80",
           }}
-          thumbColor={product.available ? RestaurantColors.status.accepted : theme.textSecondary}
+          thumbColor={product.available ? RestaurantColors.status.completed : theme.textSecondary}
         />
       </View>
     </Pressable>
@@ -209,7 +209,7 @@ export default function ManagerProductsScreen() {
         style={({ pressed }) => [
           styles.fab,
           {
-            backgroundColor: RestaurantColors.secondary,
+            backgroundColor: RestaurantColors.primary,
             bottom: tabBarHeight + Spacing.lg,
             opacity: pressed ? 0.9 : 1,
             transform: [{ scale: pressed ? 0.95 : 1 }],

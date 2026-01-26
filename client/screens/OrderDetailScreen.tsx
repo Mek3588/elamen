@@ -10,8 +10,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/DataContext";
-import { BorderRadius, Spacing, Shadows, RestaurantColors } from "@/constants/theme";
-import { OrderStatus } from "@/types";
+import { BorderRadius, Spacing, Shadows, CURRENCY } from "@/constants/theme";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 
 type RouteParams = {
@@ -19,8 +18,6 @@ type RouteParams = {
     orderId: string;
   };
 };
-
-const STATUS_FLOW: OrderStatus[] = ["pending", "accepted", "preparing", "ready", "served"];
 
 export default function OrderDetailScreen() {
   const route = useRoute<RouteProp<RouteParams, "OrderDetail">>();
@@ -46,18 +43,14 @@ export default function OrderDetailScreen() {
     );
   }
 
-  const currentStatusIndex = STATUS_FLOW.indexOf(order.status);
-  const canProgress = currentStatusIndex < STATUS_FLOW.length - 1;
-  const nextStatus = canProgress ? STATUS_FLOW[currentStatusIndex + 1] : null;
+  const canComplete = order.status === "pending";
 
-  const handleProgressStatus = async () => {
-    if (!nextStatus) return;
-    
+  const handleCompleteOrder = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setIsSaving(true);
     
     try {
-      await updateOrderStatus(order.id, nextStatus, user?.id, user?.username);
+      await updateOrderStatus(order.id, "completed", user?.id, user?.username);
     } catch (error) {
       console.error("Failed to update status:", error);
     } finally {
@@ -78,36 +71,6 @@ export default function OrderDetailScreen() {
     }
   };
 
-  const getNextStatusLabel = () => {
-    switch (nextStatus) {
-      case "accepted":
-        return "Accept Order";
-      case "preparing":
-        return "Start Preparing";
-      case "ready":
-        return "Mark as Ready";
-      case "served":
-        return "Mark as Served";
-      default:
-        return "";
-    }
-  };
-
-  const getNextStatusColor = () => {
-    switch (nextStatus) {
-      case "accepted":
-        return theme.accepted;
-      case "preparing":
-        return theme.preparing;
-      case "ready":
-        return theme.ready;
-      case "served":
-        return theme.served;
-      default:
-        return theme.link;
-    }
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
       <FlatList
@@ -115,7 +78,7 @@ export default function OrderDetailScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.xl,
-          paddingBottom: canProgress ? 120 : insets.bottom + Spacing.xl,
+          paddingBottom: canComplete ? 120 : insets.bottom + Spacing.xl,
           paddingHorizontal: Spacing.lg,
         }}
         scrollIndicatorInsets={{ bottom: insets.bottom }}
@@ -154,7 +117,7 @@ export default function OrderDetailScreen() {
                 <View style={styles.cardRow}>
                   <Feather name="user" size={16} color={theme.textSecondary} />
                   <ThemedText style={[styles.cardLabel, { color: theme.textSecondary }]}>
-                    Assigned to
+                    Handled by
                   </ThemedText>
                   <ThemedText style={styles.cardValue}>
                     {order.workerName}
@@ -185,7 +148,7 @@ export default function OrderDetailScreen() {
               ) : null}
             </View>
             <ThemedText style={[styles.itemPrice, { color: theme.link }]}>
-              ${(item.price * item.quantity).toFixed(2)}
+              {CURRENCY} {(item.price * item.quantity).toFixed(2)}
             </ThemedText>
           </Animated.View>
         )}
@@ -197,7 +160,7 @@ export default function OrderDetailScreen() {
             >
               <ThemedText style={styles.totalLabel}>Total</ThemedText>
               <ThemedText style={[styles.totalValue, { color: theme.link }]}>
-                ${order.totalAmount.toFixed(2)}
+                {CURRENCY} {order.totalAmount.toFixed(2)}
               </ThemedText>
             </Animated.View>
 
@@ -240,7 +203,7 @@ export default function OrderDetailScreen() {
         }
       />
 
-      {canProgress ? (
+      {canComplete ? (
         <Animated.View
           entering={FadeInDown.duration(300)}
           style={[
@@ -249,21 +212,21 @@ export default function OrderDetailScreen() {
           ]}
         >
           <Pressable
-            onPress={handleProgressStatus}
+            onPress={handleCompleteOrder}
             disabled={isSaving}
             style={({ pressed }) => [
               styles.actionButton,
               {
-                backgroundColor: getNextStatusColor(),
+                backgroundColor: theme.completed,
                 opacity: pressed || isSaving ? 0.8 : 1,
               },
               Shadows.medium,
             ]}
           >
             <ThemedText style={styles.actionButtonText}>
-              {isSaving ? "Updating..." : getNextStatusLabel()}
+              {isSaving ? "Updating..." : "Mark as Completed"}
             </ThemedText>
-            <Feather name="arrow-right" size={20} color="#FFFFFF" />
+            <Feather name="check" size={20} color="#FFFFFF" />
           </Pressable>
         </Animated.View>
       ) : null}

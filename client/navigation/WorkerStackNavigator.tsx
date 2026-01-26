@@ -21,7 +21,7 @@ export default function WorkerStackNavigator() {
         name="WorkerTabs"
         component={WorkerTabNavigator}
         options={{
-          headerTitle: () => <HeaderTitle title="Kitchen Flow" />,
+          headerTitle: () => <HeaderTitle title="EL/Amen" />,
         }}
       />
       <Stack.Screen

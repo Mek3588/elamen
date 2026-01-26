@@ -5,7 +5,6 @@ import {
   TextInput,
   Pressable,
   Image,
-  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -69,7 +68,7 @@ export default function LoginScreen() {
     >
       <Animated.View entering={FadeInDown.delay(100).duration(600)}>
         <Image
-          source={require("../../assets/images/icon.png")}
+          source={require("../../assets/images/logo.png")}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -79,9 +78,9 @@ export default function LoginScreen() {
         entering={FadeInDown.delay(200).duration(600)}
         style={styles.headerContainer}
       >
-        <ThemedText style={styles.title}>Kitchen Flow</ThemedText>
+        <ThemedText style={styles.title}>EL/Amen</ThemedText>
         <ThemedText style={[styles.subtitle, { color: theme.textSecondary }]}>
-          Restaurant Management System
+          Food Court Management
         </ThemedText>
       </Animated.View>
 
@@ -152,7 +151,7 @@ export default function LoginScreen() {
                 {
                   color:
                     selectedRole === "manager"
-                      ? "#FFFFFF"
+                      ? "#1A1A1A"
                       : theme.textSecondary,
                 },
               ]}
@@ -165,7 +164,7 @@ export default function LoginScreen() {
                 {
                   color:
                     selectedRole === "manager"
-                      ? "rgba(255,255,255,0.8)"
+                      ? "rgba(0,0,0,0.6)"
                       : theme.textSecondary,
                 },
               ]}
@@ -242,7 +241,10 @@ export default function LoginScreen() {
           ]}
           testID="button-login"
         >
-          <ThemedText style={styles.loginButtonText}>
+          <ThemedText style={[
+            styles.loginButtonText,
+            { color: selectedRole === "manager" ? "#1A1A1A" : "#FFFFFF" }
+          ]}>
             {isLoading ? "Signing in..." : "Sign In"}
           </ThemedText>
         </Pressable>
@@ -267,9 +269,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 120,
+    height: 120,
     marginBottom: Spacing.xl,
+    borderRadius: BorderRadius.lg,
   },
   headerContainer: {
     alignItems: "center",
@@ -341,7 +344,6 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   loginButtonText: {
-    color: "#FFFFFF",
     fontSize: 17,
     fontWeight: "600",
   },

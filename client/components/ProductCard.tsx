@@ -9,7 +9,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
-import { BorderRadius, Spacing, Shadows } from "@/constants/theme";
+import { BorderRadius, Spacing, Shadows, CURRENCY } from "@/constants/theme";
 import { Product } from "@/types";
 
 interface ProductCardProps {
@@ -83,7 +83,7 @@ export function ProductCard({
             {product.name}
           </ThemedText>
           <ThemedText style={[styles.price, { color: theme.link }]}>
-            ${product.price.toFixed(2)}
+            {CURRENCY} {product.price.toFixed(2)}
           </ThemedText>
         </View>
 

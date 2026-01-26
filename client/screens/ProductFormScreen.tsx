@@ -8,7 +8,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useData } from "@/context/DataContext";
-import { BorderRadius, Spacing, Shadows, RestaurantColors } from "@/constants/theme";
+import { BorderRadius, Spacing, Shadows, RestaurantColors, CURRENCY } from "@/constants/theme";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 
 type RouteParams = {
@@ -17,7 +17,7 @@ type RouteParams = {
   };
 };
 
-const CATEGORIES = ["Pizza", "Pasta", "Mains", "Salads", "Desserts", "Drinks"];
+const CATEGORIES = ["Mains", "Vegetarian", "Fast Food", "Drinks", "Desserts", "Sides"];
 
 export default function ProductFormScreen() {
   const route = useRoute<RouteProp<RouteParams, "ProductForm">>();
@@ -147,7 +147,7 @@ export default function ProductFormScreen() {
                 color: theme.text,
               },
             ]}
-            placeholder="e.g. Margherita Pizza"
+            placeholder="e.g. Doro Wat"
             placeholderTextColor={theme.textSecondary}
             value={name}
             onChangeText={setName}
@@ -164,10 +164,10 @@ export default function ProductFormScreen() {
       <Animated.View entering={FadeInDown.delay(200).duration(500)}>
         <View style={styles.inputGroup}>
           <ThemedText style={[styles.label, { color: theme.textSecondary }]}>
-            Price
+            Price ({CURRENCY})
           </ThemedText>
           <View style={styles.priceInputContainer}>
-            <ThemedText style={styles.currencySymbol}>$</ThemedText>
+            <ThemedText style={styles.currencySymbol}>{CURRENCY}</ThemedText>
             <TextInput
               style={[
                 styles.input,
@@ -212,11 +212,11 @@ export default function ProductFormScreen() {
                   {
                     backgroundColor:
                       category === cat
-                        ? RestaurantColors.secondary
+                        ? RestaurantColors.primary
                         : theme.surface,
                     borderColor:
                       category === cat
-                        ? RestaurantColors.secondary
+                        ? RestaurantColors.primary
                         : theme.border,
                   },
                 ]}
@@ -284,7 +284,7 @@ export default function ProductFormScreen() {
               styles.toggle,
               {
                 backgroundColor: available
-                  ? RestaurantColors.status.accepted
+                  ? RestaurantColors.status.completed
                   : theme.backgroundDefault,
               },
             ]}
@@ -309,7 +309,7 @@ export default function ProductFormScreen() {
           style={({ pressed }) => [
             styles.saveButton,
             {
-              backgroundColor: RestaurantColors.secondary,
+              backgroundColor: RestaurantColors.primary,
               opacity: pressed || isSaving ? 0.8 : 1,
             },
             Shadows.medium,
