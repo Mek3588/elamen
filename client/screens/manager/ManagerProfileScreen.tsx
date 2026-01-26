@@ -11,6 +11,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 import { BorderRadius, Spacing, Shadows, RestaurantColors } from "@/constants/theme";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
@@ -128,7 +129,7 @@ export default function ManagerProfileScreen() {
           Settings
         </ThemedText>
         <MenuItem icon="bell" label="Notifications" />
-        <MenuItem icon="moon" label="Appearance" />
+        <ThemeToggle />
         <MenuItem icon="help-circle" label="Help & Support" />
       </Animated.View>
 

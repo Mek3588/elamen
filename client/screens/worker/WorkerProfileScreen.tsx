@@ -11,6 +11,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 import { BorderRadius, Spacing, Shadows, RestaurantColors } from "@/constants/theme";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface MenuItemProps {
   icon: keyof typeof Feather.glyphMap;
@@ -104,7 +105,7 @@ export default function WorkerProfileScreen() {
           Settings
         </ThemedText>
         <MenuItem icon="bell" label="Notifications" />
-        <MenuItem icon="moon" label="Appearance" />
+        <ThemeToggle />
         <MenuItem icon="help-circle" label="Help & Support" />
       </Animated.View>
 
