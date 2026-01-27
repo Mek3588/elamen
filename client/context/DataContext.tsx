@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from "react";
 import { getApiUrl } from "@/lib/query-client";
+import { notificationService } from "@/services/NotificationService";
 
 interface Product {
   id: string;
@@ -60,6 +61,8 @@ interface DataContextType {
   addWorker: (username: string, password: string) => Promise<Worker>;
   deleteWorker: (id: string) => Promise<void>;
   getOrdersByDate: (startDate: Date, endDate: Date) => Order[];
+  setUserRole: (role: "worker" | "manager" | null) => void;
+  initializeNotifications: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -69,8 +72,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState<"worker" | "manager" | null>(null);
+  const notificationsInitialized = useRef(false);
+  const previousOrderCount = useRef<number>(0);
 
   const apiUrl = getApiUrl();
+
+  const initializeNotifications = async () => {
+    if (notificationsInitialized.current) return;
+    const success = await notificationService.initialize();
+    if (success) {
+      notificationsInitialized.current = true;
+      notificationService.setLastOrderCount(orders.filter(o => o.status === "pending").length);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -90,6 +105,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         const data = await response.json();
         setOrders(data);
+        
+        if (userRole === "manager" && notificationsInitialized.current) {
+          await notificationService.checkForNewOrders(data, true);
+        }
       }
     } catch (error) {
       console.error("Failed to fetch orders:", error);
@@ -313,6 +332,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addWorker,
         deleteWorker,
         getOrdersByDate,
+        setUserRole,
+        initializeNotifications,
       }}
     >
       {children}

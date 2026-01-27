@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { View, StyleSheet, FlatList, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -47,8 +47,13 @@ export default function ManagerDashboardScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
-  const { orders, products, isLoading, refreshData } = useData();
+  const { orders, products, isLoading, refreshData, setUserRole, initializeNotifications } = useData();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  useEffect(() => {
+    setUserRole("manager");
+    initializeNotifications();
+  }, []);
 
   const stats = useMemo(() => {
     const pendingOrders = orders.filter((o) => o.status === "pending").length;
