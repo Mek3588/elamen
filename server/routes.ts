@@ -235,6 +235,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Health check endpoint
+  app.get("/api/health", async (_req: Request, res: Response) => {
+    try {
+      const timestamp = new Date().toISOString();
+      const randomText = Math.random().toString(36).substring(7);
+      res.json({
+        status: "ok",
+        timestamp,
+        randomText,
+        message: "Server is alive and healthy"
+      });
+    } catch (error) {
+      console.error("Health check error:", error);
+      res.status(500).json({ error: "Health check failed" });
+    }
+  });
+
   // Seed initial products if empty
   app.post("/api/seed", async (_req: Request, res: Response) => {
     try {
