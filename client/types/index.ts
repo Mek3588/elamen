@@ -15,7 +15,7 @@ export interface Worker {
   active: boolean;
 }
 
-export type OrderStatus = "pending" | "completed";
+export type OrderStatus = "pending" | "preparing" | "ready" | "completed" | "cancelled";
 
 export interface Product {
   id: string;

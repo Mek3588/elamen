@@ -111,6 +111,7 @@ client/
 - Created comprehensive REST API with endpoints for all CRUD operations and authentication
 - Updated DataContext to fetch from API with real-time polling (5-second intervals)
 - Implemented dark/light mode theme toggle with AsyncStorage persistence
+- Added real-time push notifications for managers when new orders are placed (works best on Expo Go)
 
 ## User Preferences
 - Currency: Ethiopian Birr (Br)
