@@ -43,10 +43,10 @@ export interface Order {
   totalAmount: number;
   createdAt: string;
   updatedAt: string;
-  workerId?: string;
-  workerName?: string;
-  notes?: string;
-  tableNumber?: number;
+  workerId?: string | null;
+  workerName?: string | null;
+  notes?: string | null;
+  tableNumber?: number | null;
 }
 
 export interface AuthState {

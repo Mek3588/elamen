@@ -71,6 +71,9 @@ client/
 - Browse available menu products
 - Create orders by adding products to cart
 - View and manage orders with simplified status: "Order" (pending) → "Completed"
+- **Edit/Delete Orders**: Workers can edit order details or delete orders
+- **Date Filter**: Filter completed orders by Today, This Week, This Month, or All Time
+- **Full Date/Time Display**: Orders show both date and time (e.g., "Today, 10:30 AM" or "Jan 15, 2:45 PM")
 - Sign out from Profile tab
 
 ### Manager App
@@ -100,6 +103,10 @@ client/
 4. Sign out from Profile tab
 
 ## Recent Changes
+- Added delete/edit functionality for orders in worker app with confirmation modal
+- Added date filter for completed orders (Today, This Week, This Month, All Time)
+- Updated OrderCard to show full date and time for all orders
+- Modernized bottom navigation with rounded corners, blur effects, and highlighted active icons
 - Renamed app from Kitchen Flow to EL/Amen
 - Added EL/Amen logo integration
 - Changed currency from USD ($) to Ethiopian Birr (Br)
