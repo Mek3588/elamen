@@ -58,6 +58,7 @@ interface DataContextType {
   createOrder: (items: Omit<OrderItem, "id">[], tableNumber?: number, notes?: string) => Promise<Order>;
   updateOrderStatus: (orderId: string, status: OrderStatus, workerId?: string, workerName?: string) => Promise<void>;
   addOrderNotes: (orderId: string, notes: string) => Promise<void>;
+  deleteOrder: (orderId: string) => Promise<void>;
   addWorker: (username: string, password: string) => Promise<Worker>;
   deleteWorker: (id: string) => Promise<void>;
   getOrdersByDate: (startDate: Date, endDate: Date) => Order[];
@@ -279,6 +280,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setOrders((prev) => prev.map((o) => (o.id === orderId ? updatedOrder : o)));
   };
 
+  const deleteOrder = async (orderId: string) => {
+    const response = await fetch(new URL(`/api/orders/${orderId}`, apiUrl).toString(), {
+      method: "DELETE",
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to delete order");
+    }
+    
+    setOrders((prev) => prev.filter((o) => o.id !== orderId));
+  };
+
   const addWorker = async (username: string, password: string): Promise<Worker> => {
     const response = await fetch(new URL("/api/workers", apiUrl).toString(), {
       method: "POST",
@@ -329,6 +342,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         createOrder,
         updateOrderStatus,
         addOrderNotes,
+        deleteOrder,
         addWorker,
         deleteWorker,
         getOrdersByDate,

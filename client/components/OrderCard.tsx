@@ -20,21 +20,18 @@ interface OrderCardProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-function formatTime(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-}
-
-function formatDate(dateString: string): string {
+function formatDateTime(dateString: string): string {
   const date = new Date(dateString);
   const today = new Date();
   const isToday = date.toDateString() === today.toDateString();
+  const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   
   if (isToday) {
-    return formatTime(dateString);
+    return `Today, ${time}`;
   }
   
-  return date.toLocaleDateString([], { month: "short", day: "numeric" });
+  const dateStr = date.toLocaleDateString([], { month: "short", day: "numeric" });
+  return `${dateStr}, ${time}`;
 }
 
 export function OrderCard({ order, onPress, showWorker = false }: OrderCardProps) {
@@ -116,7 +113,7 @@ export function OrderCard({ order, onPress, showWorker = false }: OrderCardProps
           <View style={styles.footerLeft}>
             <Feather name="clock" size={12} color={theme.textSecondary} />
             <ThemedText style={[styles.time, { color: theme.textSecondary }]}>
-              {formatDate(order.createdAt)}
+              {formatDateTime(order.createdAt)}
             </ThemedText>
             {showWorker && order.workerName ? (
               <>

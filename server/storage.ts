@@ -28,6 +28,7 @@ export interface IStorage {
   getOrdersByDateRange(startDate: Date, endDate: Date): Promise<Order[]>;
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrder(id: string, updates: Partial<InsertOrder>): Promise<Order | undefined>;
+  deleteOrder(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -113,6 +114,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(orders.id, id))
       .returning();
     return order || undefined;
+  }
+
+  async deleteOrder(id: string): Promise<void> {
+    await db.delete(orders).where(eq(orders.id, id));
   }
 }
 

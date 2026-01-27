@@ -225,6 +225,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/orders/:id", async (req: Request, res: Response) => {
+    try {
+      await storage.deleteOrder(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      res.status(500).json({ error: "Failed to delete order" });
+    }
+  });
+
   // Seed initial products if empty
   app.post("/api/seed", async (_req: Request, res: Response) => {
     try {
