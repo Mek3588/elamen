@@ -27,6 +27,11 @@ function setupCors(app: express.Application) {
       });
     }
 
+    // Add Render domain for production
+    if (process.env.NODE_ENV === "production") {
+      origins.add("https://elamen.onrender.com");
+    }
+
     const origin = req.header("origin");
 
     // Allow localhost origins for Expo web development (any port)
