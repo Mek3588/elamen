@@ -11,8 +11,18 @@ export function getApiUrl(): string {
     throw new Error("EXPO_PUBLIC_DOMAIN is not set");
   }
 
-  let url = new URL(`https://${host}`);
+  // Determine protocol based on host
+  let protocol = "https://";
+  if (host.startsWith("localhost") || host.startsWith("127.0.0.1")) {
+    protocol = "http://";
+  }
+  // If host already contains a protocol, use it as is
+  if (host.startsWith("http://") || host.startsWith("https://")) {
+    let url = new URL(host);
+    return url.href;
+  }
 
+  let url = new URL(`${protocol}${host}`);
   return url.href;
 }
 

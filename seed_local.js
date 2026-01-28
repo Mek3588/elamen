@@ -17,9 +17,22 @@ async function seed() {
           ('Tibs', 250, 'Mains', true, 'Sauteed beef with onions and peppers'),
           ('Doro Wat', 300, 'Mains', true, 'Spicy chicken stew with egg')
       `);
-      console.log('Seeded successfully');
+      console.log('Products seeded successfully');
     } else {
       console.log('Database already has products');
+    }
+
+    // Check if admin worker exists
+    const workerRes = await pool.query("SELECT COUNT(*) FROM workers WHERE username = 'admin'");
+    if (parseInt(workerRes.rows[0].count) === 0) {
+      console.log('Seeding admin worker...');
+      await pool.query(`
+        INSERT INTO workers (username, password, role, active)
+        VALUES ('admin', 'admin123', 'manager', true)
+      `);
+      console.log('Admin worker seeded successfully');
+    } else {
+      console.log('Admin worker already exists');
     }
   } catch (err) {
     console.error('Error:', err.message);

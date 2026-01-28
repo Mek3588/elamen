@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "node:http";
 import { storage } from "./storage";
 import { insertProductSchema, insertOrderSchema, insertWorkerSchema } from "@shared/schema";
+import { upload } from "./cloudinary";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Workers API
@@ -43,15 +44,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Username and role are required" });
       }
 
-      // For managers, just check role
+      // For managers, check if a worker with role "manager" exists
       if (role === "manager") {
-        return res.json({ 
-          id: "manager-" + Date.now(), 
-          username, 
-          role: "manager",
-          active: true,
-          createdAt: new Date().toISOString()
-        });
+        let worker = await storage.getWorkerByUsername(username);
+        if (!worker || worker.role !== "manager") {
+          return res.status(401).json({ error: "Invalid manager credentials" });
+        }
+        // Optionally verify password (plaintext for now)
+        if (worker.password !== password) {
+          return res.status(401).json({ error: "Invalid password" });
+        }
+        return res.json(worker);
       }
 
       // For workers, check if user exists or create new one
@@ -75,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/workers/:id", async (req: Request, res: Response) => {
     try {
-      await storage.deleteWorker(req.params.id);
+      await storage.deleteWorker(req.params.id as string);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting worker:", error);
@@ -96,7 +99,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/products/:id", async (req: Request, res: Response) => {
     try {
-      const product = await storage.getProduct(req.params.id);
+      const product = await storage.getProduct(req.params.id as string);
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
       }
@@ -107,12 +110,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/products", async (req: Request, res: Response) => {
+  app.post("/api/products", upload.single("image"), async (req: Request, res: Response) => {
     try {
-      const parsed = insertProductSchema.safeParse(req.body);
+      const { name, price, category, description, available } = req.body;
+      const imageUrl = (req.file as any)?.path || null;
+
+      const productData = {
+        name: name?.trim(),
+        price: parseFloat(price),
+        category,
+        description: description?.trim(),
+        available: available === "true" || available === true,
+        imageUrl,
+      };
+
+      const parsed = insertProductSchema.safeParse(productData);
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.message });
       }
+
       const product = await storage.createProduct(parsed.data);
       res.status(201).json(product);
     } catch (error) {
@@ -121,9 +137,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/products/:id", async (req: Request, res: Response) => {
+  app.put("/api/products/:id", upload.single("image"), async (req: Request, res: Response) => {
     try {
-      const product = await storage.updateProduct(req.params.id, req.body);
+      const { name, price, category, description, available } = req.body;
+      const imageUrl = (req.file as any)?.path || undefined;
+
+      const updateData: any = {
+        name: name?.trim(),
+        price: price ? parseFloat(price) : undefined,
+        category,
+        description: description?.trim(),
+        available: available === "true" || available === true,
+      };
+      if (imageUrl !== undefined) {
+        updateData.imageUrl = imageUrl;
+      }
+
+      const product = await storage.updateProduct(req.params.id as string, updateData);
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
       }
@@ -136,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/products/:id", async (req: Request, res: Response) => {
     try {
-      await storage.deleteProduct(req.params.id);
+      await storage.deleteProduct(req.params.id as string);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -157,7 +187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/orders/:id", async (req: Request, res: Response) => {
     try {
-      const order = await storage.getOrder(req.params.id);
+      const order = await storage.getOrder(req.params.id as string);
       if (!order) {
         return res.status(404).json({ error: "Order not found" });
       }
@@ -170,8 +200,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/orders/range/:start/:end", async (req: Request, res: Response) => {
     try {
-      const startDate = new Date(req.params.start);
-      const endDate = new Date(req.params.end);
+      const startDate = new Date(req.params.start as string);
+      const endDate = new Date(req.params.end as string);
       const orders = await storage.getOrdersByDateRange(startDate, endDate);
       res.json(orders);
     } catch (error) {
@@ -196,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/orders/:id", async (req: Request, res: Response) => {
     try {
-      const order = await storage.updateOrder(req.params.id, req.body);
+      const order = await storage.updateOrder(req.params.id as string, req.body);
       if (!order) {
         return res.status(404).json({ error: "Order not found" });
       }
@@ -210,7 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/orders/:id/status", async (req: Request, res: Response) => {
     try {
       const { status, workerId, workerName } = req.body;
-      const order = await storage.updateOrder(req.params.id, { 
+      const order = await storage.updateOrder(req.params.id as string, {
         status, 
         workerId, 
         workerName 
@@ -227,7 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/orders/:id", async (req: Request, res: Response) => {
     try {
-      await storage.deleteOrder(req.params.id);
+      await storage.deleteOrder(req.params.id as string);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting order:", error);

@@ -52,8 +52,8 @@ interface DataContextType {
   workers: Worker[];
   isLoading: boolean;
   refreshData: () => Promise<void>;
-  addProduct: (product: Omit<Product, "id" | "createdAt" | "updatedAt">) => Promise<Product>;
-  updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
+  addProduct: (product: Omit<Product, "id" | "createdAt" | "updatedAt">, imageUri?: string) => Promise<Product>;
+  updateProduct: (id: string, updates: Partial<Product>, imageUri?: string) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   createOrder: (items: Omit<OrderItem, "id">[], tableNumber?: number, notes?: string) => Promise<Order>;
   updateOrderStatus: (orderId: string, status: OrderStatus, workerId?: string, workerName?: string) => Promise<void>;
@@ -108,7 +108,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setOrders(data);
         
         if (userRole === "manager" && notificationsInitialized.current) {
-          await notificationService.checkForNewOrders(data, true);
+          await notificationService.checkForCompletedOrders(data, true);
         }
       }
     } catch (error) {
@@ -164,15 +164,38 @@ export function DataProvider({ children }: { children: ReactNode }) {
     await Promise.all([fetchProducts(), fetchOrders(), fetchWorkers()]);
   };
 
-  const addProduct = async (productData: Omit<Product, "id" | "createdAt" | "updatedAt">): Promise<Product> => {
-    const response = await fetch(new URL("/api/products", apiUrl).toString(), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(productData),
-    });
+  const addProduct = async (productData: Omit<Product, "id" | "createdAt" | "updatedAt">, imageUri?: string): Promise<Product> => {
+    let response: Response;
+    if (imageUri) {
+      const formData = new FormData();
+      formData.append("name", productData.name);
+      formData.append("price", productData.price.toString());
+      formData.append("category", productData.category);
+      if (productData.description) {
+        formData.append("description", productData.description);
+      }
+      formData.append("available", productData.available.toString());
+      
+      // Convert image URI to blob
+      const blob = await (await fetch(imageUri)).blob();
+      formData.append("image", blob, "image.jpg");
+      
+      response = await fetch(new URL("/api/products", apiUrl).toString(), {
+        method: "POST",
+        body: formData,
+        // Do not set Content-Type header, let browser set it with boundary
+      });
+    } else {
+      response = await fetch(new URL("/api/products", apiUrl).toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(productData),
+      });
+    }
     
     if (!response.ok) {
-      throw new Error("Failed to create product");
+      const error = await response.json().catch(() => ({ error: "Failed to create product" }));
+      throw new Error(error.error || "Failed to create product");
     }
     
     const newProduct = await response.json();
@@ -180,15 +203,35 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return newProduct;
   };
 
-  const updateProduct = async (id: string, updates: Partial<Product>) => {
-    const response = await fetch(new URL(`/api/products/${id}`, apiUrl).toString(), {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
-    });
+  const updateProduct = async (id: string, updates: Partial<Product>, imageUri?: string) => {
+    let response: Response;
+    if (imageUri) {
+      const formData = new FormData();
+      if (updates.name) formData.append("name", updates.name);
+      if (updates.price) formData.append("price", updates.price.toString());
+      if (updates.category) formData.append("category", updates.category);
+      if (updates.description !== undefined) formData.append("description", updates.description || "");
+      if (updates.available !== undefined) formData.append("available", updates.available.toString());
+      
+      // Convert image URI to blob
+      const blob = await (await fetch(imageUri)).blob();
+      formData.append("image", blob, "image.jpg");
+      
+      response = await fetch(new URL(`/api/products/${id}`, apiUrl).toString(), {
+        method: "PUT",
+        body: formData,
+      });
+    } else {
+      response = await fetch(new URL(`/api/products/${id}`, apiUrl).toString(), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+    }
     
     if (!response.ok) {
-      throw new Error("Failed to update product");
+      const error = await response.json().catch(() => ({ error: "Failed to update product" }));
+      throw new Error(error.error || "Failed to update product");
     }
     
     const updatedProduct = await response.json();

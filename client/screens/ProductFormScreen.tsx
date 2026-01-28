@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from "react";
-import { View, StyleSheet, Pressable, TextInput, ScrollView } from "react-native";
+import { View, StyleSheet, Pressable, TextInput, ScrollView, Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as ImagePicker from "expo-image-picker";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
@@ -39,10 +40,34 @@ export default function ProductFormScreen() {
   const [category, setCategory] = useState(existingProduct?.category || CATEGORIES[0]);
   const [description, setDescription] = useState(existingProduct?.description || "");
   const [available, setAvailable] = useState(existingProduct?.available ?? true);
+  const [imageUri, setImageUri] = useState<string | null>(existingProduct?.imageUrl || null);
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isEditing = !!existingProduct;
+
+  const pickImage = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        alert("Permission to access camera roll is required!");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0].uri) {
+        setImageUri(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+    }
+  };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -78,10 +103,19 @@ export default function ProductFormScreen() {
         available,
       };
 
+      // Determine if we need to upload image
+      let imageToUpload: string | undefined = undefined;
+      if (imageUri && imageUri !== existingProduct?.imageUrl) {
+        // If imageUri is a local file (starts with file:// or content://) or is a new image
+        if (imageUri.startsWith('file://') || imageUri.startsWith('content://') || !imageUri.startsWith('http')) {
+          imageToUpload = imageUri;
+        }
+      }
+
       if (isEditing && existingProduct) {
-        await updateProduct(existingProduct.id, productData);
+        await updateProduct(existingProduct.id, productData, imageToUpload);
       } else {
-        await addProduct(productData);
+        await addProduct(productData, imageToUpload);
       }
       
       navigation.goBack();
@@ -118,19 +152,30 @@ export default function ProductFormScreen() {
       }}
     >
       <Animated.View entering={FadeInDown.delay(100).duration(500)}>
-        <View style={styles.imageUpload}>
-          <View
-            style={[
-              styles.imagePlaceholder,
-              { backgroundColor: theme.backgroundDefault },
-            ]}
-          >
-            <Feather name="camera" size={32} color={theme.textSecondary} />
-            <ThemedText style={[styles.imageText, { color: theme.textSecondary }]}>
-              Add Photo
-            </ThemedText>
-          </View>
-        </View>
+        <Pressable onPress={pickImage} style={styles.imageUpload}>
+          {imageUri ? (
+            <Image
+              source={{ uri: imageUri }}
+              style={[
+                styles.imagePlaceholder,
+                { backgroundColor: theme.backgroundDefault },
+              ]}
+              resizeMode="cover"
+            />
+          ) : (
+            <View
+              style={[
+                styles.imagePlaceholder,
+                { backgroundColor: theme.backgroundDefault },
+              ]}
+            >
+              <Feather name="camera" size={32} color={theme.textSecondary} />
+              <ThemedText style={[styles.imageText, { color: theme.textSecondary }]}>
+                Add Photo
+              </ThemedText>
+            </View>
+          )}
+        </Pressable>
       </Animated.View>
 
       <Animated.View entering={FadeInDown.delay(150).duration(500)}>

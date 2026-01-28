@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getApiUrl } from "@/lib/query-client";
 import { User, UserRole } from "@/types";
 
 interface AuthContextType {
@@ -36,10 +37,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (username: string, password: string, role: UserRole): Promise<boolean> => {
     try {
+      const apiUrl = getApiUrl();
+      const response = await fetch(new URL("/api/workers/login", apiUrl).toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, role }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: "Login failed" }));
+        throw new Error(error.error || "Login failed");
+      }
+
+      const worker = await response.json();
       const newUser: User = {
-        id: Date.now().toString(),
-        username,
-        role,
+        id: worker.id,
+        username: worker.username,
+        role: worker.role as UserRole,
       };
       await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newUser));
       setUser(newUser);

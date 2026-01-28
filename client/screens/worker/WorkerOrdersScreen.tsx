@@ -13,7 +13,12 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/DataContext";
-import { BorderRadius, Spacing, Shadows, RestaurantColors } from "@/constants/theme";
+import {
+  BorderRadius,
+  Spacing,
+  Shadows,
+  RestaurantColors,
+} from "@/constants/theme";
 import { Order } from "@/types";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -36,16 +41,37 @@ const DATE_FILTERS: { key: DateFilterType; label: string }[] = [
 
 function getDateRange(filter: DateFilterType): { start: Date; end: Date } {
   const now = new Date();
-  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+  const end = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59,
+  );
   let start: Date;
 
   switch (filter) {
     case "today":
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+      start = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        0,
+        0,
+        0,
+      );
       break;
     case "week":
       const dayOfWeek = now.getDay();
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek, 0, 0, 0);
+      start = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() - dayOfWeek,
+        0,
+        0,
+        0,
+      );
       break;
     case "month":
       start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
@@ -65,9 +91,10 @@ export default function WorkerOrdersScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
   const { user } = useAuth();
-  const { orders, isLoading, updateOrderStatus, deleteOrder, refreshData } = useData();
+  const { orders, isLoading, updateOrderStatus, deleteOrder, refreshData } =
+    useData();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  
+
   const [activeFilter, setActiveFilter] = useState<FilterType>("orders");
   const [dateFilter, setDateFilter] = useState<DateFilterType>("today");
   const [refreshing, setRefreshing] = useState(false);
@@ -176,9 +203,7 @@ export default function WorkerOrdersScreen() {
                       styles.filterText,
                       {
                         color:
-                          activeFilter === filter.key
-                            ? "#FFFFFF"
-                            : theme.text,
+                          activeFilter === filter.key ? "#FFFFFF" : theme.text,
                       },
                     ]}
                   >
@@ -211,7 +236,7 @@ export default function WorkerOrdersScreen() {
                 </Pressable>
               ))}
             </View>
-            
+
             {activeFilter === "completed" ? (
               <View style={styles.dateFilterRow}>
                 {DATE_FILTERS.map((filter) => (
@@ -266,8 +291,8 @@ export default function WorkerOrdersScreen() {
               activeFilter === "orders"
                 ? "New orders will appear here"
                 : activeFilter === "completed" && dateFilter !== "all"
-                ? `No orders completed ${dateFilter === "today" ? "today" : dateFilter === "week" ? "this week" : "this month"}`
-                : "Completed orders will appear here"
+                  ? `No orders completed ${dateFilter === "today" ? "today" : dateFilter === "week" ? "this week" : "this month"}`
+                  : "Completed orders will appear here"
             }
           />
         }
@@ -281,7 +306,10 @@ export default function WorkerOrdersScreen() {
                   style={({ pressed }) => [
                     styles.actionButton,
                     styles.completeButton,
-                    { backgroundColor: theme.completed, opacity: pressed ? 0.8 : 1 },
+                    {
+                      backgroundColor: theme.completed,
+                      opacity: pressed ? 0.8 : 1,
+                    },
                   ]}
                 >
                   <Feather name="check" size={16} color="#FFFFFF" />
@@ -290,7 +318,7 @@ export default function WorkerOrdersScreen() {
                   </ThemedText>
                 </Pressable>
               ) : null}
-              <Pressable
+              {/* <Pressable
                 onPress={() => handleOrderPress(item)}
                 style={({ pressed }) => [
                   styles.actionButton,
@@ -302,20 +330,27 @@ export default function WorkerOrdersScreen() {
                 <ThemedText style={[styles.actionButtonText, { color: theme.text }]}>
                   Edit
                 </ThemedText>
-              </Pressable>
-              <Pressable
-                onPress={() => handleDeletePress(item)}
-                style={({ pressed }) => [
-                  styles.actionButton,
-                  styles.deleteButton,
-                  { backgroundColor: "rgba(214, 40, 40, 0.1)", opacity: pressed ? 0.8 : 1 },
-                ]}
-              >
-                <Feather name="trash-2" size={16} color="#D62828" />
-                <ThemedText style={[styles.actionButtonText, { color: "#D62828" }]}>
-                  Delete
-                </ThemedText>
-              </Pressable>
+              </Pressable> */}
+              {item.status !== "completed" && (
+                <Pressable
+                  onPress={() => handleDeletePress(item)}
+                  style={({ pressed }) => [
+                    styles.actionButton,
+                    styles.deleteButton,
+                    {
+                      backgroundColor: "rgba(214, 40, 40, 0.1)",
+                      opacity: pressed ? 0.8 : 1,
+                    },
+                  ]}
+                >
+                  <Feather name="trash-2" size={16} color="#D62828" />
+                  <ThemedText
+                    style={[styles.actionButtonText, { color: "#D62828" }]}
+                  >
+                    Delete
+                  </ThemedText>
+                </Pressable>
+              )}
             </View>
           </Animated.View>
         )}
@@ -328,20 +363,30 @@ export default function WorkerOrdersScreen() {
         onRequestClose={() => setDeleteModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
+          <View
+            style={[styles.modalContent, { backgroundColor: theme.surface }]}
+          >
             <View style={styles.modalIcon}>
               <Feather name="alert-triangle" size={32} color="#D62828" />
             </View>
             <ThemedText style={styles.modalTitle}>Delete Order?</ThemedText>
-            <ThemedText style={[styles.modalMessage, { color: theme.textSecondary }]}>
-              Are you sure you want to delete Order #{orderToDelete?.id.slice(-4)}? This action cannot be undone.
+            <ThemedText
+              style={[styles.modalMessage, { color: theme.textSecondary }]}
+            >
+              Are you sure you want to delete Order #
+              {orderToDelete?.id.slice(-4)}? This action cannot be undone.
             </ThemedText>
             <View style={styles.modalButtons}>
               <Pressable
                 onPress={() => setDeleteModalVisible(false)}
-                style={[styles.modalButton, { backgroundColor: theme.backgroundDefault }]}
+                style={[
+                  styles.modalButton,
+                  { backgroundColor: theme.backgroundDefault },
+                ]}
               >
-                <ThemedText style={[styles.modalButtonText, { color: theme.text }]}>
+                <ThemedText
+                  style={[styles.modalButtonText, { color: theme.text }]}
+                >
                   Cancel
                 </ThemedText>
               </Pressable>
@@ -349,7 +394,9 @@ export default function WorkerOrdersScreen() {
                 onPress={confirmDelete}
                 style={[styles.modalButton, { backgroundColor: "#D62828" }]}
               >
-                <ThemedText style={[styles.modalButtonText, { color: "#FFFFFF" }]}>
+                <ThemedText
+                  style={[styles.modalButtonText, { color: "#FFFFFF" }]}
+                >
                   Delete
                 </ThemedText>
               </Pressable>
