@@ -1,0 +1,426 @@
+{
+  "info": {
+    "name": "El-Amen Backend API (Production)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "API collection for testing the El-Amen backend in production environment (NODE_ENV=production). Base URL: https://elamen.onrender.com"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://elamen.onrender.com/api/health",
+          "protocol": "https",
+          "host": ["elamen", "onrender", "com"],
+          "path": ["api", "health"]
+        },
+        "description": "Check if the server is alive and healthy."
+      },
+      "response": []
+    },
+    {
+      "name": "Seed Database",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://elamen.onrender.com/api/seed",
+          "protocol": "https",
+          "host": ["elamen", "onrender", "com"],
+          "path": ["api", "seed"]
+        },
+        "description": "Seed the database with sample products (only works if database is empty)."
+      },
+      "response": []
+    },
+    {
+      "name": "Workers",
+      "item": [
+        {
+          "name": "Get All Workers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://elamen.onrender.com/api/workers",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "workers"]
+            },
+            "description": "Retrieve all workers."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Worker",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"worker1\",\n  \"password\": \"password123\",\n  \"role\": \"worker\"\n}"
+            },
+            "url": {
+              "raw": "https://elamen.onrender.com/api/workers",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "workers"]
+            },
+            "description": "Create a new worker."
+          },
+          "response": []
+        },
+        {
+          "name": "Worker Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"manager\",\n  \"role\": \"manager\"\n}"
+            },
+            "url": {
+              "raw": "https://elamen.onrender.com/api/workers/login",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "workers", "login"]
+            },
+            "description": "Login as a worker or manager. For managers, only username and role are required."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Worker",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://elamen.onrender.com/api/workers/:id",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "workers", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "worker-id"
+                }
+              ]
+            },
+            "description": "Delete a worker by ID."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://elamen.onrender.com/api/products",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "products"]
+            },
+            "description": "Retrieve all products."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://elamen.onrender.com/api/products/:id",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "products", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product-id"
+                }
+              ]
+            },
+            "description": "Retrieve a specific product by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Product\",\n  \"price\": 100,\n  \"category\": \"Mains\",\n  \"available\": true,\n  \"description\": \"A delicious new product\"\n}"
+            },
+            "url": {
+              "raw": "https://elamen.onrender.com/api/products",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "products"]
+            },
+            "description": "Create a new product."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Product\",\n  \"price\": 120,\n  \"category\": \"Mains\",\n  \"available\": false,\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "https://elamen.onrender.com/api/products/:id",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "products", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product-id"
+                }
+              ]
+            },
+            "description": "Update a product by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://elamen.onrender.com/api/products/:id",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "products", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product-id"
+                }
+              ]
+            },
+            "description": "Delete a product by ID."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://elamen.onrender.com/api/orders",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "orders"]
+            },
+            "description": "Retrieve all orders."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://elamen.onrender.com/api/orders/:id",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "orders", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order-id"
+                }
+              ]
+            },
+            "description": "Retrieve a specific order by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Orders by Date Range",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://elamen.onrender.com/api/orders/range/:start/:end",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "orders", "range", ":start", ":end"],
+              "variable": [
+                {
+                  "key": "start",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "end",
+                  "value": "2025-12-31"
+                }
+              ]
+            },
+            "description": "Retrieve orders within a date range (YYYY-MM-DD format)."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"John Doe\",\n  \"items\": [\n    { \"productId\": \"product-id\", \"quantity\": 2, \"price\": 250 }\n  ],\n  \"totalAmount\": 500,\n  \"status\": \"pending\",\n  \"workerId\": \"worker-id\",\n  \"workerName\": \"Worker Name\"\n}"
+            },
+            "url": {
+              "raw": "https://elamen.onrender.com/api/orders",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "orders"]
+            },
+            "description": "Create a new order."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Updated Name\",\n  \"totalAmount\": 600\n}"
+            },
+            "url": {
+              "raw": "https://elamen.onrender.com/api/orders/:id",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "orders", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order-id"
+                }
+              ]
+            },
+            "description": "Update an order by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\",\n  \"workerId\": \"worker-id\",\n  \"workerName\": \"Worker Name\"\n}"
+            },
+            "url": {
+              "raw": "https://elamen.onrender.com/api/orders/:id/status",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "orders", ":id", "status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order-id"
+                }
+              ]
+            },
+            "description": "Update only the status of an order."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://elamen.onrender.com/api/orders/:id",
+              "protocol": "https",
+              "host": ["elamen", "onrender", "com"],
+              "path": ["api", "orders", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order-id"
+                }
+              ]
+            },
+            "description": "Delete an order by ID."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://elamen.onrender.com"
+    }
+  ]
+}
