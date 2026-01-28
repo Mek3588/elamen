@@ -10,3 +10,4 @@ const databaseUrl =
 
 export const pool = new Pool({ connectionString: databaseUrl });
 export const db = drizzle(pool, { schema });
+// Hardcoded Neon DB URL
