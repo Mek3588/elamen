@@ -57,16 +57,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(worker);
       }
 
-      // For workers, check if user exists or create new one
+      // For workers, check if user exists
       let worker = await storage.getWorkerByUsername(username);
-      
       if (!worker) {
-        // Auto-create worker on first login
-        worker = await storage.createWorker({ 
-          username, 
-          password: password || "default", 
-          role: "worker" 
-        });
+        return res.status(401).json({ error: "Invalid username or password" });
+      }
+      // Verify password
+      if (worker.password !== password) {
+        return res.status(401).json({ error: "Invalid username or password" });
       }
 
       res.json(worker);

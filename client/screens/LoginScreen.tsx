@@ -42,8 +42,8 @@ export default function LoginScreen() {
     try {
       await login(username.trim(), password, selectedRole);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (err) {
-      setError("Login failed. Please try again.");
+    } catch (err: any) {
+      setError(err.message || "Login failed. Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsLoading(false);
@@ -252,7 +252,7 @@ export default function LoginScreen() {
 
       <Animated.View entering={FadeInUp.delay(500).duration(600)}>
         <ThemedText style={[styles.hint, { color: theme.textSecondary }]}>
-          Enter any username to continue
+          Enter username to continue
         </ThemedText>
       </Animated.View>
     </KeyboardAwareScrollViewCompat>
