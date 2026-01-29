@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApiUrl } from "@/lib/query-client";
 import { User, UserRole } from "@/types";
@@ -8,19 +8,51 @@ interface AuthContextType {
   isLoading: boolean;
   login: (username: string, password: string, role: UserRole) => Promise<boolean>;
   logout: () => Promise<void>;
+  resetInactivityTimer: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_STORAGE_KEY = "@restaurant_auth";
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const clearInactivityTimer = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
+
+  const startInactivityTimer = () => {
+    clearInactivityTimer();
+    timeoutRef.current = setTimeout(() => {
+      logout();
+    }, INACTIVITY_TIMEOUT);
+  };
+
+  const resetInactivityTimer = () => {
+    if (user) {
+      startInactivityTimer();
+    }
+  };
 
   useEffect(() => {
     loadStoredAuth();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      startInactivityTimer();
+    } else {
+      clearInactivityTimer();
+    }
+    return () => clearInactivityTimer();
+  }, [user]);
 
   const loadStoredAuth = async () => {
     try {
@@ -69,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, resetInactivityTimer }}>
       {children}
     </AuthContext.Provider>
   );
